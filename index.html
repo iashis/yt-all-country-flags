@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Country Info Display</title>
+    <style>
+        .country-info {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        img.flag {
+            float: right;
+            width: 250px;
+            height: auto;
+        }
+        .button {
+            margin: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+    <button class="button" onclick="downloadExcel()">Download Excel</button>
+    <div id="content"></div>
+
+    <script>
+        // Sample JSON data
+        // const jsonData = [
+        //     {"Serial Number": 1, "Country": "Afghanistan", "Short Name": "AF", "Capital": "Kabul", "Option A": "Kabul", "Option B": "Herat", "Option C": "Mazar-i-Sharif", "Option D": "Kandahar", "Correct Answer": "A"},
+        //     {"Serial Number": 2, "Country": "Albania", "Short Name": "AL", "Capital": "Tirana", "Option A": "Tirana", "Option B": "Durres", "Option C": "Shkoder", "Option D": "Fier", "Correct Answer": "A"}
+            // Add more entries as needed
+
+//             Here's the complete JSON file containing the data:
+
+// ```json
+const jsonData = [
+    {"Serial Number": 1, "Country": "Afghanistan", "Short Name": "AF", "Capital": "Kabul", "Option A": "Kabul", "Option B": "Herat", "Option C": "Mazar-i-Sharif", "Option D": "Jalalabad", "Correct Answer": "A"},
+    {"Serial Number": 2, "Country": "Albania", "Short Name": "AL", "Capital": "Tirana", "Option A": "Tirana", "Option B": "Durrës", "Option C": "Shkodër", "Option D": "Fier", "Correct Answer": "A"},
+    {"Serial Number": 3, "Country": "Algeria", "Short Name": "DZ", "Capital": "Algiers", "Option A": "Algiers", "Option B": "Oran", "Option C": "Constantine", "Option D": "Annaba", "Correct Answer": "A"},
+    {"Serial Number": 4, "Country": "Andorra", "Short Name": "AD", "Capital": "Andorra la Vella", "Option A": "Andorra la Vella", "Option B": "Escaldes-Engordany", "Option C": "Sant Julià de Lòria", "Option D": "Ordino", "Correct Answer": "A"},
+    {"Serial Number": 5, "Country": "Angola", "Short Name": "AO", "Capital": "Luanda", "Option A": "Luanda", "Option B": "Huambo", "Option C": "Lubango", "Option D": "Malanje", "Correct Answer": "A"},
+    {"Serial Number": 6, "Country": "Antigua and Barbuda", "Short Name": "AG", "Capital": "St. John's", "Option A": "St. John's", "Option B": "All Saints", "Option C": "Codrington", "Option D": "Falmouth", "Correct Answer": "A"},
+    {"Serial Number": 7, "Country": "Argentina", "Short Name": "AR", "Capital": "Buenos Aires", "Option A": "Buenos Aires", "Option B": "Córdoba", "Option C": "Rosario", "Option D": "Mendoza", "Correct Answer": "A"},
+    {"Serial Number": 8, "Country": "Armenia", "Short Name": "AM", "Capital": "Yerevan", "Option A": "Yerevan", "Option B": "Gyumri", "Option C": "Vagharshapat", "Option D": "Kapan", "Correct Answer": "A"},
+    {"Serial Number": 9, "Country": "Australia", "Short Name": "AU", "Capital": "Canberra", "Option A": "Canberra", "Option B": "Sydney", "Option C": "Melbourne", "Option D": "Brisbane", "Correct Answer": "A"},
+    {"Serial Number": 10, "Country": "Austria", "Short Name": "AT", "Capital": "Vienna", "Option A": "Vienna", "Option B": "Salzburg", "Option C": "Graz", "Option D": "Linz", "Correct Answer": "A"},
+    {"Serial Number": 11, "Country": "Azerbaijan", "Short Name": "AZ", "Capital": "Baku", "Option A": "Baku", "Option B": "Ganja", "Option C": "Lankaran", "Option D": "Sumqayit", "Correct Answer": "A"},
+    {"Serial Number": 12, "Country": "Bahamas", "Short Name": "BS", "Capital": "Nassau", "Option A": "Nassau", "Option B": "Freeport", "Option C": "Cooper's Town", "Option D": "George Town", "Correct Answer": "A"},
+    {"Serial Number": 13, "Country": "Bahrain", "Short Name": "BH", "Capital": "Manama", "Option A": "Manama", "Option B": "Riffa", "Option C": "Muharraq", "Option D": "Sitra", "Correct Answer": "A"},
+    {"Serial Number": 14, "Country": "Bangladesh", "Short Name": "BD", "Capital": "Dhaka", "Option A": "Dhaka", "Option B": "Chittagong", "Option C": "Khulna", "Option D": "Sylhet", "Correct Answer": "A"},
+    {"Serial Number": 15, "Country": "Barbados", "Short Name": "BB", "Capital": "Bridgetown", "Option A": "Bridgetown", "Option B": "Oistins", "Option C": "Speightstown", "Option D": "Bathsheba", "Correct Answer": "A"},
+    {"Serial Number": 16, "Country": "Belarus", "Short Name": "BY", "Capital": "Minsk", "Option A": "Minsk", "Option B": "Gomel", "Option C": "Brest", "Option D": "Vitebsk", "Correct Answer": "A"},
+    {"Serial Number": 17, "Country": "Belgium", "Short Name": "BE", "Capital": "Brussels", "Option A": "Brussels", "Option B": "Antwerp", "Option C": "Ghent", "Option D": "Bruges", "Correct Answer": "A"},
+    {"Serial Number": 18, "Country": "Belize", "Short Name": "BZ", "Capital": "Belmopan", "Option A": "Belmopan", "Option B": "Belize City", "Option C": "San Ignacio", "Option D": "Corozal", "Correct Answer": "A"},
+    {"Serial Number": 19, "Country": "Benin", "Short Name": "BJ", "Capital": "Porto-Novo", "Option A": "Porto-Novo", "Option B": "Cotonou", "Option C": "Parakou", "Option D": "Djougou", "Correct Answer": "A"},
+    {"Serial Number": 20, "Country": "Bhutan", "Short Name": "BT", "Capital": "Thimphu", "Option A": "Thimphu", "Option B": "Punakha", "Option C": "Phuentsholing", "Option D": "Paro", "Correct Answer": "A"},
+    {"Serial Number": 21, "Country": "Bolivia", "Short Name": "BO", "Capital": "Sucre", "Option A": "Sucre", "Option B": "La Paz", "Option C": "Cochabamba", "Option D": "Santa Cruz", "Correct Answer": "A"},
+    {"Serial Number": 22, "Country": "Bosnia and Herzegovina", "Short Name": "BA", "Capital": "Sarajevo", "Option A": "Sarajevo", "Option B": "Banja Luka", "Option C": "Tuzla", "Option D": "Zenica", "Correct Answer": "A"},
+    {"Serial Number": 23, "Country": "Botswana", "Short Name": "BW", "Capital": "Gaborone", "Option A": "Gaborone", "Option B": "Francistown", "Option C": "Maun", "Option D": "Kasane", "Correct Answer": "A"},
+    {"Serial Number": 24, "Country": "Brazil", "Short Name": "BR", "Capital": "Brasília", "Option A": "Brasília", "Option B": "Rio de Janeiro", "Option C": "São Paulo", "Option D": "Salvador", "Correct Answer": "A"},
+    {"Serial Number": 25, "Country": "Brunei", "Short Name": "BN", "Capital": "Bandar Seri Begawan", "Option A": "Bandar Seri Begawan", "Option B": "Kuala Belait", "Option C": "Tutong", "Option D": "Seria", "Correct Answer": "A"},
+    {"Serial Number": 26, "Country": "Bulgaria", "Short Name": "BG", "Capital": "Sofia", "Option A": "Sofia", "Option B": "Plovdiv", "Option C": "Varna", "Option D": "Burgas", "Correct Answer": "A"},
+    {"Serial Number": 27, "Country": "Burkina Faso", "Short Name": "BF", "Capital": "Ouagadougou", "Option A": "Ouagadougou", "Option B": "Bobo-Dioulasso", "Option C": "Koudougou", "Option D": "Banfora", "Correct Answer": "A"},
+    {"Serial Number": 28, "Country": "Burundi", "Short Name": "BI", "Capital": "Gitega", "Option A": "Gitega", "Option B": "Bujumbura", "Option C": "Ngozi", "Option D": "Ruyigi", "Correct Answer": "A"},
+    {"Serial Number": 29, "Country": "Cabo Verde", "Short Name": "CV", "Capital": "Praia", "Option A": "Praia", "Option B": "Mindelo", "Option C": "Santa Maria", "Option D": "Assomada", "Correct Answer": "A"},
+    {"Serial Number": 30, "Country": "Cambodia", "Short Name": "KH", "Capital": "Phnom Penh", "Option A": "Phnom Penh", "Option B": "Siem Reap", "Option C": "Battambang", "Option D": "Kep", "Correct Answer": "A"},
+    {"Serial Number": 31, "Country": "Cameroon", "Short Name": "CM", "Capital": "Yaoundé", "Option A": "Yaoundé", "Option B": "Douala", "Option C": "Bafoussam", "Option D": "Garoua", "Correct Answer": "A"},
+    {"Serial Number": 32, "Country": "Canada", "Short Name": "CA", "Capital": "Ottawa", "Option A": "Ottawa", "Option B": "Toronto", "Option C": "Vancouver", "Option D": "Montreal", "Correct Answer": "A"},
+    {"Serial Number": 33, "Country": "Central African Republic", "Short Name": "CF", "Capital": "Bangui", "Option A": "Bangui", "Option B": "Bangassou", "Option C": "Berbérati", "Option D": "Kaga-Bandoro", "Correct Answer": "A"},
+    {"Serial Number": 34, "Country": "Chad", "Short Name": "TD", "Capital": "N'Djamena", "Option A": "N'Djamena", "Option B": "Moundou", "Option C": "Sarh", "Option D": "Abéché", "Correct Answer": "A"},
+    {"Serial Number": 35, "Country": "Chile", "Short Name": "CL", "Capital": "Santiago", "Option A": "Santiago", "Option B": "Valparaíso", "Option C": "Concepción", "Option D": "La Serena", "Correct Answer": "A"},
+    {"Serial Number": 36, "Country": "China", "Short Name": "CN", "Capital": "Beijing", "Option A": "Beijing", "Option B": "Shanghai", "Option C": "Guangzhou", "Option D": "Shenzhen", "Correct Answer": "A"},
+    {"Serial Number": 37, "Country": "Colombia", "Short Name": "CO", "Capital": "Bogotá", "Option A": "Bogotá", "Option B": "Medellín", "Option C": "Cali", "Option D": "Barranquilla", "Correct Answer": "A"},
+    {"Serial Number": 38, "Country": "Comoros", "Short Name": "KM", "Capital": "Moroni", "Option A": "Moroni", "Option B": "Mutsamudu", "Option C": "Fomboni", "Option D": "Iconi", "Correct Answer": "A"},
+    {"Serial Number": 39, "Country": "Congo (Congo-Brazzaville)", "Short Name": "CG", "Capital": "Brazzaville", "Option A": "Brazzaville", "Option B": "Pointe-Noire", "Option C": "Dolisie", "Option D": "Oyo", "Correct Answer": "A"},
+    {"Serial Number": 40, "Country": "Costa Rica", "Short Name": "CR", "Capital": "San José", "Option A": "San José", "Option B": "Alajuela", "Option C": "Cartago", "Option D": "Heredia", "Correct Answer": "A"},
+    {"Serial Number": 41, "Country": "Croatia", "Short Name": "HR", "Capital": "Zagreb", "Option A": "Zagreb", "Option B": "Split", "Option C": "Rijeka", "Option D": "Osijek", "Correct Answer": "A"},
+    {"Serial Number": 42, "Country": "Cuba", "Short Name": "CU", "Capital": "Havana", "Option A": "Havana", "Option B": "Santiago de Cuba", "Option C": "Camagüey", "Option D": "Holguín", "Correct Answer": "A"},
+    {"Serial Number": 43, "Country": "Cyprus", "Short Name": "CY", "Capital": "Nicosia", "Option A": "Nicosia", "Option B": "Limassol", "Option C": "Larnaca", "Option D": "Famagusta", "Correct Answer": "A"},
+    {"Serial Number": 44, "Country": "Czech Republic", "Short Name": "CZ", "Capital": "Prague", "Option A": "Prague", "Option B": "Brno", "Option C": "Ostrava", "Option D": "Plzeň", "Correct Answer": "A"},
+    {"Serial Number": 45, "Country": "Denmark", "Short Name": "DK", "Capital": "Copenhagen", "Option A": "Copenhagen", "Option B": "Aarhus", "Option C": "Odense", "Option D": "Aalborg", "Correct Answer": "A"},
+    {"Serial Number": 46, "Country": "Djibouti", "Short Name": "DJ", "Capital": "Djibouti", "Option A": "Djibouti", "Option B": "Ali Sabieh", "Option C": "Obock", "Option D": "Tadjoura", "Correct Answer": "A"},
+    {"Serial Number": 47, "Country": "Dominica", "Short Name": "DM", "Capital": "Roseau", "Option A": "Roseau", "Option B": "Portsmouth", "Option C": "Marigot", "Option D": "Salisbury", "Correct Answer": "A"},
+    {"Serial Number": 48, "Country": "Dominican Republic", "Short Name": "DO", "Capital": "Santo Domingo", "Option A": "Santo Domingo", "Option B": "Santiago de los Caballeros", "Option C": "La Romana", "Option D": "San Pedro de Macorís", "Correct Answer": "A"},
+    {"Serial Number": 49, "Country": "Ecuador", "Short Name": "EC", "Capital": "Quito", "Option A": "Quito", "Option B": "Guayaquil", "Option C": "Cuenca", "Option D": "Manta", "Correct Answer": "A"},
+    {"Serial Number": 50, "Country": "Egypt", "Short Name": "EG", "Capital": "Cairo", "Option A": "Cairo", "Option B": "Alexandria", "Option C": "Giza", "Option D": "Luxor", "Correct Answer": "A"},
+    {"Serial Number": 51, "Country": "El Salvador", "Short Name": "SV", "Capital": "San Salvador", "Option A": "San Salvador", "Option B": "Santa Ana", "Option C": "San Miguel", "Option D": "La Unión", "Correct Answer": "A"},
+    {"Serial Number": 52, "Country": "Equatorial Guinea", "Short Name": "GQ", "Capital": "Malabo", "Option A": "Malabo", "Option B": "Bata", "Option C": "Evinayong", "Option D": "Ebebiyin", "Correct Answer": "A"},
+    {"Serial Number": 53, "Country": "Eritrea", "Short Name": "ER", "Capital": "Asmara", "Option A": "Asmara", "Option B": "Mendefera", "Option C": "Keren", "Option D": "Massawa", "Correct Answer": "A"},
+    {"Serial Number": 54, "Country": "Estonia", "Short Name": "EE", "Capital": "Tallinn", "Option A": "Tallinn", "Option B": "Tartu", "Option C": "Narva", "Option D": "Pärnu", "Correct Answer": "A"},
+    {"Serial Number": 55, "Country": "Eswatini", "Short Name": "SZ", "Capital": "Mbabane", "Option A": "Mbabane", "Option B": "Manzini", "Option C": "Lobamba", "Option D": "Siteki", "Correct Answer": "A"},
+    {"Serial Number": 56, "Country": "Ethiopia", "Short Name": "ET", "Capital": "Addis Ababa", "Option A": "Addis Ababa", "Option B": "Dire Dawa", "Option C": "Mekelle", "Option D": "Bahir Dar", "Correct Answer": "A"},
+    {"Serial Number": 57, "Country": "Fiji", "Short Name": "FJ", "Capital": "Suva", "Option A": "Suva", "Option B": "Lautoka", "Option C":"Nadi", "Option D": "Labasa", "Correct Answer": "A"},
+    {"Serial Number": 58, "Country": "Finland", "Short Name": "FI", "Capital": "Helsinki", "Option A": "Helsinki", "Option B": "Espoo", "Option C": "Tampere", "Option D": "Oulu", "Correct Answer": "A"},
+    {"Serial Number": 59, "Country": "France", "Short Name": "FR", "Capital": "Paris", "Option A": "Paris", "Option B": "Marseille", "Option C": "Lyon", "Option D": "Toulouse", "Correct Answer": "A"},
+    {"Serial Number": 60, "Country": "Gabon", "Short Name": "GA", "Capital": "Libreville", "Option A": "Libreville", "Option B": "Port-Gentil", "Option C": "Franceville", "Option D": "Ovan", "Correct Answer": "A"},
+    {"Serial Number": 61, "Country": "Gambia", "Short Name": "GM", "Capital": "Banjul", "Option A": "Banjul", "Option B": "Serekunda", "Option C": "Brikama", "Option D": "Farafenni", "Correct Answer": "A"},
+    {"Serial Number": 62, "Country": "Georgia", "Short Name": "GE", "Capital": "Tbilisi", "Option A": "Tbilisi", "Option B": "Batumi", "Option C": "Zugdidi", "Option D": "Rustavi", "Correct Answer": "A"},
+    {"Serial Number": 63, "Country": "Germany", "Short Name": "DE", "Capital": "Berlin", "Option A": "Berlin", "Option B": "Munich", "Option C": "Frankfurt", "Option D": "Hamburg", "Correct Answer": "A"},
+    {"Serial Number": 64, "Country": "Ghana", "Short Name": "GH", "Capital": "Accra", "Option A": "Accra", "Option B": "Kumasi", "Option C": "Tamale", "Option D": "Sekondi-Takoradi", "Correct Answer": "A"},
+    {"Serial Number": 65, "Country": "Greece", "Short Name": "GR", "Capital": "Athens", "Option A": "Athens", "Option B": "Thessaloniki", "Option C": "Patras", "Option D": "Heraklion", "Correct Answer": "A"},
+    {"Serial Number": 66, "Country": "Grenada", "Short Name": "GD", "Capital": "St. George's", "Option A": "St. George's", "Option B": "Grenville", "Option C": "Sauteurs", "Option D": "Victoria", "Correct Answer": "A"},
+    {"Serial Number": 67, "Country": "Guatemala", "Short Name": "GT", "Capital": "Guatemala City", "Option A": "Guatemala City", "Option B": "Antigua Guatemala", "Option C": "Quetzaltenango", "Option D": "Escuintla", "Correct Answer": "A"},
+    {"Serial Number": 68, "Country": "Guinea", "Short Name": "GN", "Capital": "Conakry", "Option A": "Conakry", "Option B": "Kindia", "Option C": "Kankan", "Option D": "Labe", "Correct Answer": "A"},
+    {"Serial Number": 69, "Country": "Guinea-Bissau", "Short Name": "GW", "Capital": "Bissau", "Option A": "Bissau", "Option B": "Bafata", "Option C": "Gabú", "Option D": "Bolama", "Correct Answer": "A"},
+    {"Serial Number": 70, "Country": "Guyana", "Short Name": "GY", "Capital": "Georgetown", "Option A": "Georgetown", "Option B": "New Amsterdam", "Option C": "Linden", "Option D": "Lethem", "Correct Answer": "A"},
+    {"Serial Number": 71, "Country": "Haiti", "Short Name": "HT", "Capital": "Port-au-Prince", "Option A": "Port-au-Prince", "Option B": "Cap-Haïtien", "Option C": "Jacmel", "Option D": "Les Cayes", "Correct Answer": "A"},
+    {"Serial Number": 72, "Country": "Honduras", "Short Name": "HN", "Capital": "Tegucigalpa", "Option A": "Tegucigalpa", "Option B": "San Pedro Sula", "Option C": "La Ceiba", "Option D": "Choloma", "Correct Answer": "A"},
+    {"Serial Number": 73, "Country": "Hungary", "Short Name": "HU", "Capital": "Budapest", "Option A": "Budapest", "Option B": "Debrecen", "Option C": "Szeged", "Option D": "Pécs", "Correct Answer": "A"},
+    {"Serial Number": 74, "Country": "Iceland", "Short Name": "IS", "Capital": "Reykjavík", "Option A": "Reykjavík", "Option B": "Akureyri", "Option C": "Selfoss", "Option D": "Kopavogur", "Correct Answer": "A"},
+    {"Serial Number": 75, "Country": "India", "Short Name": "IN", "Capital": "New Delhi", "Option A": "New Delhi", "Option B": "Mumbai", "Option C": "Kolkata", "Option D": "Bengaluru", "Correct Answer": "A"},
+    {"Serial Number": 76, "Country": "Indonesia", "Short Name": "ID", "Capital": "Jakarta", "Option A": "Jakarta", "Option B": "Surabaya", "Option C": "Medan", "Option D": "Bali", "Correct Answer": "A"},
+    {"Serial Number": 77, "Country": "Iran", "Short Name": "IR", "Capital": "Tehran", "Option A": "Tehran", "Option B": "Mashhad", "Option C": "Isfahan", "Option D": "Shiraz", "Correct Answer": "A"},
+    {"Serial Number": 78, "Country": "Iraq", "Short Name": "IQ", "Capital": "Baghdad", "Option A": "Baghdad", "Option B": "Basra", "Option C": "Mosul", "Option D": "Kirkuk", "Correct Answer": "A"},
+    {"Serial Number": 79, "Country": "Ireland", "Short Name": "IE", "Capital": "Dublin", "Option A": "Dublin", "Option B": "Cork", "Option C": "Limerick", "Option D": "Galway", "Correct Answer": "A"},
+    {"Serial Number": 80, "Country": "Israel", "Short Name": "IL", "Capital": "Jerusalem", "Option A": "Jerusalem", "Option B": "Tel Aviv", "Option C": "Haifa", "Option D": "Be'er Sheva", "Correct Answer": "A"},
+    {"Serial Number": 81, "Country": "Italy", "Short Name": "IT", "Capital": "Rome", "Option A": "Rome", "Option B": "Milan", "Option C": "Naples", "Option D": "Florence", "Correct Answer": "A"},
+    {"Serial Number": 82, "Country": "Jamaica", "Short Name": "JM", "Capital": "Kingston", "Option A": "Kingston", "Option B": "Montego Bay", "Option C": "Ocho Rios", "Option D": "Spanish Town", "Correct Answer": "A"},
+    {"Serial Number": 83, "Country": "Japan", "Short Name": "JP", "Capital": "Tokyo", "Option A": "Tokyo", "Option B": "Osaka", "Option C": "Kyoto", "Option D": "Hiroshima", "Correct Answer": "A"},
+    {"Serial Number": 84, "Country": "Jordan", "Short Name": "JO", "Capital": "Amman", "Option A": "Amman", "Option B": "Zarqa", "Option C": "Irbid", "Option D": "Aqaba", "Correct Answer": "A"},
+    {"Serial Number": 85, "Country": "Kazakhstan", "Short Name": "KZ", "Capital": "Astana", "Option A": "Astana", "Option B": "Almaty", "Option C": "Shymkent", "Option D": "Karaganda", "Correct Answer": "A"},
+    {"Serial Number": 86, "Country": "Kenya", "Short Name": "KE", "Capital": "Nairobi", "Option A": "Nairobi", "Option B": "Mombasa", "Option C": "Kisumu", "Option D": "Eldoret", "Correct Answer": "A"},
+    {"Serial Number": 87, "Country": "Kiribati", "Short Name": "KI", "Capital": "Tarawa", "Option A": "Tarawa", "Option B": "Kiritimati", "Option C": "Butaritari", "Option D": "Abemama", "Correct Answer": "A"},
+    {"Serial Number": 88, "Country": "Kuwait", "Short Name": "KW", "Capital": "Kuwait City", "Option A": "Kuwait City", "Option B": "Jahra", "Option C": "Ahmadi", "Option D": "Hawalli", "Correct Answer": "A"},
+    {"Serial Number": 89, "Country": "Laos", "Short Name": "LA", "Capital": "Vientiane", "Option A": "Vientiane", "Option B": "Luang Prabang", "Option C": "Pakse", "Option D": "Savannakhet", "Correct Answer": "A"},
+    {"Serial Number": 90, "Country": "Latvia", "Short Name": "LV", "Capital": "Riga", "Option A": "Riga", "Option B": "Daugavpils", "Option C": "Liepāja", "Option D": "Ventspils", "Correct Answer": "A"},
+    {"Serial Number": 91, "Country": "Lebanon", "Short Name": "LB", "Capital": "Beirut", "Option A": "Beirut", "Option B": "Tripoli", "Option C": "Sidon", "Option D": "Tyre", "Correct Answer": "A"},
+    {"Serial Number": 92, "Country": "Lesotho", "Short Name": "LS", "Capital": "Maseru", "Option A": "Maseru", "Option B": "Teyateyaneng", "Option C": "Maputsoe", "Option D": "Mokhotlong", "Correct Answer": "A"},
+    {"Serial Number": 93, "Country": "Liberia", "Short Name": "LR", "Capital": "Monrovia", "Option A": "Monrovia", "Option B": "Gbarnga", "Option C": "Buchanan", "Option D": "Zwedru", "Correct Answer": "A"},
+    {"Serial Number": 94, "Country": "Libya", "Short Name": "LY", "Capital": "Tripoli", "Option A": "Tripoli", "Option B": "Benghazi", "Option C": "Misrata", "Option D": "Sebha", "Correct Answer": "A"},
+    {"Serial Number": 95, "Country": "Liechtenstein", "Short Name": "LI", "Capital": "Vaduz", "Option A": "Vaduz", "Option B": "Schaan", "Option C": "Balzers", "Option D": "Eschen", "Correct Answer": "A"},
+    {"Serial Number": 96, "Country": "Lithuania", "Short Name": "LT", "Capital": "Vilnius", "Option A": "Vilnius", "Option B": "Kaunas", "Option C": "Šiauliai", "Option D": "Claipėda", "Correct Answer": "A"},
+    {"Serial Number": 97, "Country": "Luxembourg", "Short Name": "LU", "Capital": "Luxembourg City", "Option A": "Luxembourg City", "Option B": "Esch-sur-Alzette", "Option C": "Differdange", "Option D": "Echternach", "Correct Answer": "A"},
+    {"Serial Number": 98, "Country": "Madagascar", "Short Name": "MG", "Capital": "Antananarivo", "Option A": "Antananarivo", "Option B": "Toamasina", "Option C": "Mahajanga", "Option D": "Fianarantsoa", "Correct Answer": "A"},
+    {"Serial Number": 99, "Country": "Malawi", "Short Name": "MW", "Capital": "Lilongwe", "Option A": "Lilongwe", "Option B": "Blantyre", "Option C": "Mzuzu", "Option D": "Zomba", "Correct Answer": "A"},
+    {"Serial Number": 100, "Country": "Malaysia", "Short Name": "MY", "Capital": "Kuala Lumpur", "Option A": "Kuala Lumpur", "Option B": "George Town", "Option C": "Kota Kinabalu", "Option D": "Kuching", "Correct Answer": "A"},
+    {"Serial Number": 101, "Country": "Maldives", "Short Name": "MV", "Capital": "Malé", "Option A": "Malé", "Option B": "Addu City", "Option C": "Fuvahmulah", "Option D": "Thimphu", "Correct Answer": "A"},
+    {"Serial Number": 102, "Country": "Mali", "Short Name": "ML", "Capital": "Bamako", "Option A": "Bamako", "Option B": "Sikasso", "Option C": "Kayes", "Option D": "Mopti", "Correct Answer": "A"},
+    {"Serial Number": 103, "Country": "Malta", "Short Name": "MT", "Capital": "Valletta", "Option A": "Valletta", "Option B": "Sliema", "Option C": "Birkirkara", "Option D": "St. Julian's", "Correct Answer": "A"},
+    {"Serial Number": 104, "Country": "Marshall Islands", "Short Name": "MH", "Capital": "Majuro", "Option A": "Majuro", "Option B": "Ebeye", "Option C": "Jabor", "Option D": "Wotje", "Correct Answer": "A"},
+    {"Serial Number": 105, "Country": "Mauritania", "Short Name": "MR", "Capital": "Nouakchott", "Option A": "Nouakchott", "Option B": "Nouadhibou", "Option C": "Atar", "Option D": "Zouérat", "Correct Answer": "A"},
+    {"Serial Number": 106, "Country": "Mauritius", "Short Name": "MU", "Capital": "Port Louis", "Option A": "Port Louis", "Option B": "Curepipe", "Option C": "Quatre Bornes", "Option D": "Vacoas-Phoenix", "Correct Answer": "A"},
+    {"Serial Number": 107, "Country": "Mexico", "Short Name": "MX", "Capital": "Mexico City", "Option A": "Mexico City", "Option B": "Guadalajara", "Option C": "Monterrey", "Option D": "Cancún", "Correct Answer": "A"},
+    {"Serial Number": 108, "Country": "Micronesia", "Short Name": "FM", "Capital": "Palikir", "Option A": "Palikir", "Option B": "Colonia", "Option C": "Weno", "Option D": "Yap", "Correct Answer": "A"},
+    {"Serial Number": 109, "Country": "Moldova", "Short Name": "MD", "Capital": "Chisinau", "Option A": "Chisinau", "Option B": "Bălți", "Option C": "Tighina", "Option D": "Bender", "Correct Answer": "A"},
+    {"Serial Number": 110, "Country": "Monaco", "Short Name": "MC", "Capital": "Monaco", "Option A": "Monaco", "Option B": "Monte Carlo", "Option C": "La Condamine", "Option D": "Moneghetti", "Correct Answer": "A"},
+    {"Serial Number": 111, "Country": "Mongolia", "Short Name": "MN", "Capital": "Ulaanbaatar", "Option A": "Ulaanbaatar", "Option B": "Erdenet", "Option C": "Darkhan", "Option D": "Mörön", "Correct Answer": "A"},
+    {"Serial Number": 112, "Country": "Montenegro", "Short Name": "ME", "Capital": "Podgorica", "Option A": "Podgorica", "Option B": "Nikšić", "Option C": "Herceg Novi", "Option D": "Bijelo Polje", "Correct Answer": "A"},
+    {"Serial Number": 113, "Country": "Morocco", "Short Name": "MA", "Capital": "Rabat", "Option A": "Rabat", "Option B": "Casablanca", "Option C": "Marrakech", "Option D": "Tangier", "Correct Answer": "A"},
+    {"Serial Number": 114, "Country": "Mozambique", "Short Name": "MZ", "Capital": "Maputo", "Option A": "Maputo", "Option B": "Beira", "Option C": "Nampula", "Option D": "Tete","Correct Answer": "A"},
+    {"Serial Number": 115, "Country": "Myanmar", "Short Name": "MM", "Capital": "Naypyidaw", "Option A": "Naypyidaw", "Option B": "Yangon", "Option C": "Mandalay", "Option D": "Bago", "Correct Answer": "A"},
+    {"Serial Number": 116, "Country": "Namibia", "Short Name": "NA", "Capital": "Windhoek", "Option A": "Windhoek", "Option B": "Swakopmund", "Option C": "Walvis Bay", "Option D": "Katima Mulilo", "Correct Answer": "A"},
+    {"Serial Number": 117, "Country": "Nauru", "Short Name": "NR", "Capital": "Yaren", "Option A": "Yaren", "Option B": "Meneng", "Option C": "Boer", "Option D": "Anibare", "Correct Answer": "A"},
+    {"Serial Number": 118, "Country": "Nepal", "Short Name": "NP", "Capital": "Kathmandu", "Option A": "Kathmandu", "Option B": "Pokhara", "Option C": "Biratnagar", "Option D": "Lalitpur", "Correct Answer": "A"},
+    {"Serial Number": 119, "Country": "Netherlands", "Short Name": "NL", "Capital": "Amsterdam", "Option A": "Amsterdam", "Option B": "Rotterdam", "Option C": "The Hague", "Option D": "Utrecht", "Correct Answer": "A"},
+    {"Serial Number": 120, "Country": "New Zealand", "Short Name": "NZ", "Capital": "Wellington", "Option A": "Wellington", "Option B": "Auckland", "Option C": "Christchurch", "Option D": "Hamilton", "Correct Answer": "A"},
+    {"Serial Number": 121, "Country": "Nicaragua", "Short Name": "NI", "Capital": "Managua", "Option A": "Managua", "Option B": "León", "Option C": "Granada", "Option D": "Matagalpa", "Correct Answer": "A"},
+    {"Serial Number": 122, "Country": "Niger", "Short Name": "NE", "Capital": "Niamey", "Option A": "Niamey", "Option B": "Zinder", "Option C": "Maradi", "Option D": "Agadez", "Correct Answer": "A"},
+    {"Serial Number": 123, "Country": "Nigeria", "Short Name": "NG", "Capital": "Abuja", "Option A": "Abuja", "Option B": "Lagos", "Option C": "Ibadan", "Option D": "Kano", "Correct Answer": "A"},
+    {"Serial Number": 124, "Country": "North Macedonia", "Short Name": "MK", "Capital": "Skopje", "Option A": "Skopje", "Option B": "Bitola", "Option C": "Ohrid", "Option D": "Tetovo", "Correct Answer": "A"},
+    {"Serial Number": 125, "Country": "Norway", "Short Name": "NO", "Capital": "Oslo", "Option A": "Oslo", "Option B": "Bergen", "Option C": "Stavanger", "Option D": "Trondheim", "Correct Answer": "A"},
+    {"Serial Number": 126, "Country": "Oman", "Short Name": "OM", "Capital": "Muscat", "Option A": "Muscat", "Option B": "Salalah", "Option C": "Sohar", "Option D": "Nizwa", "Correct Answer": "A"},
+    {"Serial Number": 127, "Country": "Pakistan", "Short Name": "PK", "Capital": "Islamabad", "Option A": "Islamabad", "Option B": "Karachi", "Option C": "Lahore", "Option D": "Rawalpindi", "Correct Answer": "A"},
+    {"Serial Number": 128, "Country": "Palau", "Short Name": "PW", "Capital": "Ngerulmud", "Option A": "Ngerulmud", "Option B": "Koror", "Option C": "Airai", "Option D": "Melekeok", "Correct Answer": "A"},
+    {"Serial Number": 129, "Country": "Panama", "Short Name": "PA", "Capital": "Panama City", "Option A": "Panama City", "Option B": "Colón", "Option C": "David", "Option D": "Santiago", "Correct Answer": "A"},
+    {"Serial Number": 130, "Country": "Papua New Guinea", "Short Name": "PG", "Capital": "Port Moresby", "Option A": "Port Moresby", "Option B": "Lae", "Option C": "Mount Hagen", "Option D": "Madang", "Correct Answer": "A"},
+    {"Serial Number": 131, "Country": "Paraguay", "Short Name": "PY", "Capital": "Asunción", "Option A": "Asunción", "Option B": "Ciudad del Este", "Option C": "Encarnación", "Option D": "Concepción", "Correct Answer": "A"},
+    {"Serial Number": 132, "Country": "Peru", "Short Name": "PE", "Capital": "Lima", "Option A": "Lima", "Option B": "Arequipa", "Option C": "Cusco", "Option D": "Trujillo", "Correct Answer": "A"},
+    {"Serial Number": 133, "Country": "Philippines", "Short Name": "PH", "Capital": "Manila", "Option A": "Manila", "Option B": "Cebu City", "Option C": "Davao City", "Option D": "Quezon City", "Correct Answer": "A"},
+    {"Serial Number": 134, "Country": "Poland", "Short Name": "PL", "Capital": "Warsaw", "Option A": "Warsaw", "Option B": "Kraków", "Option C": "Gdańsk", "Option D": "Wrocław", "Correct Answer": "A"},
+    {"Serial Number": 135, "Country": "Portugal", "Short Name": "PT", "Capital": "Lisbon", "Option A": "Lisbon", "Option B": "Porto", "Option C": "Braga", "Option D": "Coimbra", "Correct Answer": "A"},
+    {"Serial Number": 136, "Country": "Qatar", "Short Name": "QA", "Capital": "Doha", "Option A": "Doha", "Option B": "Al Khor", "Option C": "Umm Salal", "Option D": "Al Rayyan", "Correct Answer": "A"},
+    {"Serial Number": 137, "Country": "Romania", "Short Name": "RO", "Capital": "Bucharest", "Option A": "Bucharest", "Option B": "Cluj-Napoca", "Option C": "Timișoara", "Option D": "Iași", "Correct Answer": "A"},
+    {"Serial Number": 138, "Country": "Russia", "Short Name": "RU", "Capital": "Moscow", "Option A": "Moscow", "Option B": "Saint Petersburg", "Option C": "Novosibirsk", "Option D": "Yekaterinburg", "Correct Answer": "A"},
+    {"Serial Number": 139, "Country": "Rwanda", "Short Name": "RW", "Capital": "Kigali", "Option A": "Kigali", "Option B": "Butare", "Option C": "Gisenyi", "Option D": "Ruhengeri", "Correct Answer": "A"},
+    {"Serial Number": 140, "Country": "Saint Kitts and Nevis", "Short Name": "KN", "Capital": "Basseterre", "Option A": "Basseterre", "Option B": "Charlestown", "Option C": "Sandy Point Town", "Option D": "Newcastle", "Correct Answer": "A"},
+    {"Serial Number": 141, "Country": "Saint Lucia", "Short Name": "LC", "Capital": "Castries", "Option A": "Castries", "Option B": "Vieux Fort", "Option C": "Soufrière", "Option D": "Dennery", "Correct Answer": "A"},
+    {"Serial Number": 142, "Country": "Saint Vincent and the Grenadines", "Short Name": "VC", "Capital": "Kingstown", "Option A": "Kingstown", "Option B": "Bequia", "Option C": "Union Island", "Option D": "Canouan", "Correct Answer": "A"},
+    {"Serial Number": 143, "Country": "Samoa", "Short Name": "WS", "Capital": "Apia", "Option A": "Apia", "Option B": "Faleolo", "Option C": "Salelologa", "Option D": "Apolima", "Correct Answer": "A"},
+    {"Serial Number": 144, "Country": "San Marino", "Short Name": "SM", "Capital": "San Marino", "Option A": "San Marino", "Option B": "Serravalle", "Option C": "Borgo Maggiore", "Option D": "City of San Marino", "Correct Answer": "A"},
+    {"Serial Number": 145, "Country": "Sao Tome and Principe", "Short Name": "ST", "Capital": "São Tomé", "Option A": "São Tomé", "Option B": "Principe", "Option C": "Santana", "Option D": "Neves", "Correct Answer": "A"},
+    {"Serial Number": 146, "Country": "Saudi Arabia", "Short Name": "SA", "Capital": "Riyadh", "Option A": "Riyadh", "Option B": "Jeddah", "Option C": "Mecca", "Option D": "Dammam", "Correct Answer": "A"},
+    {"Serial Number": 147, "Country": "Senegal", "Short Name": "SN", "Capital": "Dakar", "Option A": "Dakar", "Option B": "Saint-Louis", "Option C": "Thiès", "Option D": "Kaolack", "Correct Answer": "A"},
+    {"Serial Number": 148, "Country": "Serbia", "Short Name": "RS", "Capital": "Belgrade", "Option A": "Belgrade", "Option B": "Novi Sad", "Option C": "Niš", "Option D": "Kragujevac", "Correct Answer": "A"},
+    {"Serial Number": 149, "Country": "Seychelles", "Short Name": "SC", "Capital": "Victoria", "Option A": "Victoria", "Option B": "La Digue", "Option C": "Praslin", "Option D": "Mahé", "Correct Answer": "A"},
+    {"Serial Number": 150, "Country": "Sierra Leone", "Short Name": "SL", "Capital": "Freetown", "Option A": "Freetown", "Option B": "Bo", "Option C": "Kenema", "Option D": "Makeni", "Correct Answer": "A"},
+    {"Serial Number": 151, "Country": "Singapore", "Short Name": "SG", "Capital": "Singapore", "Option A": "Singapore", "Option B": "Jurong", "Option C": "Sentosa", "Option D": "Bukit Timah", "Correct Answer": "A"},
+    {"Serial Number": 152, "Country": "Slovakia", "Short Name": "SK", "Capital": "Bratislava", "Option A": "Bratislava", "Option B": "Košice", "Option C": "Prešov", "Option D": "Nitra", "Correct Answer": "A"},
+    {"Serial Number": 153, "Country": "Slovenia", "Short Name": "SI", "Capital": "Ljubljana", "Option A": "Ljubljana", "Option B": "Maribor", "Option C": "Celje", "Option D": "Kranj", "Correct Answer": "A"},
+    {"Serial Number": 154, "Country": "Solomon Islands", "Short Name": "SB", "Capital": "Honiara", "Option A": "Honiara", "Option B": "Gizo", "Option C": "Auki", "Option D": "Kirakira", "Correct Answer": "A"},
+    {"Serial Number": 155, "Country": "Somalia", "Short Name": "SO", "Capital": "Mogadishu", "Option A": "Mogadishu", "Option B": "Hargeisa", "Option C": "Kismayo", "Option D": "Baidoa", "Correct Answer": "A"},
+    {"Serial Number": 156, "Country": "South Africa", "Short Name": "ZA", "Capital": "Pretoria", "Option A": "Pretoria", "Option B": "Cape Town", "Option C": "Durban", "Option D": "Johannesburg", "Correct Answer": "A"},
+    {"Serial Number": 157, "Country": "South Sudan", "Short Name": "SS", "Capital": "Juba", "Option A": "Juba", "Option B": "Wau", "Option C": "Malakal", "Option D": "Yei", "Correct Answer": "A"},
+    {"Serial Number": 158, "Country": "Spain", "Short Name": "ES", "Capital": "Madrid", "Option A": "Madrid", "Option B": "Barcelona", "Option C": "Valencia", "Option D": "Seville", "Correct Answer": "A"},
+    {"Serial Number": 159, "Country": "Sri Lanka", "Short Name": "LK", "Capital": "Colombo", "Option A": "Colombo", "Option B": "Kandy", "Option C": "Galle", "Option D": "Jaffna", "Correct Answer": "A"},
+    {"Serial Number": 160, "Country": "Sudan", "Short Name": "SD", "Capital": "Khartoum", "Option A": "Khartoum", "Option B": "Omdurman", "Option C": "Port Sudan", "Option D": "Juba", "Correct Answer": "A"},
+    {"Serial Number": 161, "Country": "Suriname", "Short Name": "SR", "Capital": "Paramaribo", "Option A": "Paramaribo", "Option B": "Nieuw Nickerie", "Option C": "Albina", "Option D": "Brokopondo", "Correct Answer": "A"},
+    {"Serial Number": 162, "Country": "Sweden", "Short Name": "SE", "Capital": "Stockholm", "Option A": "Stockholm", "Option B": "Gothenburg", "Option C": "Malmö", "Option D": "Uppsala", "Correct Answer": "A"},
+    {"Serial Number": 163, "Country": "Switzerland", "Short Name": "CH", "Capital": "Bern", "Option A": "Bern", "Option B": "Zurich", "Option C": "Geneva", "Option D": "Lausanne", "Correct Answer": "A"},
+    {"Serial Number": 164, "Country": "Syria", "Short Name": "SY", "Capital": "Damascus", "Option A": "Damascus", "Option B": "Aleppo", "Option C": "Homs", "Option D": "Latakia", "Correct Answer": "A"},
+    {"Serial Number": 165, "Country": "Taiwan", "Short Name": "TW", "Capital": "Taipei", "Option A": "Taipei", "Option B": "Kaohsiung", "Option C": "Taichung", "Option D": "Tainan", "Correct Answer": "A"},
+    {"Serial Number": 166, "Country": "Tajikistan", "Short Name": "TJ", "Capital": "Dushanbe", "Option A": "Dushanbe", "Option B": "Khujand", "Option C": "Kurgan-Tyube", "Option D": "Istaravshan", "Correct Answer": "A"},
+    {"Serial Number": 167, "Country": "Tanzania", "Short Name": "TZ", "Capital": "Dodoma", "Option A": "Dodoma", "Option B": "Dar es Salaam", "Option C": "Arusha", "Option D": "Mbeya", "Correct Answer": "A"},
+    {"Serial Number": 168, "Country": "Thailand", "Short Name": "TH", "Capital": "Bangkok", "Option A": "Bangkok", "Option B": "Chiang Mai", "Option C": "Phuket", "Option D": "Khon Kaen", "Correct Answer": "A"},
+    {"Serial Number": 169, "Country": "Timor-Leste", "Short Name": "TL", "Capital": "Dili", "Option A": "Dili", "Option B": "Baucau", "Option C": "Viqueque", "Option D": "Oecusse", "Correct Answer": "A"},
+    {"Serial Number": 170, "Country": "Togo", "Short Name": "TG", "Capital": "Lomé", "Option A": "Lomé", "Option B": "Kara", "Option C": "Sokodé", "Option D": "Atakpamé", "Correct Answer": "A"},
+    {"Serial Number": 171, "Country": "Tonga", "Short Name": "TO", "Capital": "Nukuʻalofa", "Option A": "Nukuʻalofa", "Option B": "Vavaʻu", "Option C": "Haʻapai", "Option D": "Tongatapu", "Correct Answer": "A"},
+    {"Serial Number": 172, "Country": "Trinidad and Tobago", "Short Name": "TT", "Capital": "Port of Spain", "Option A": "Port of Spain", "Option B": "San Fernando", "Option C": "Arima", "Option D": "Chaguanas", "Correct Answer": "A"},
+    {"Serial Number": 173, "Country": "Tunisia", "Short Name": "TN", "Capital": "Tunis", "Option A": "Tunis", "Option B": "Sfax", "Option C": "Sousse", "Option D": "Kairouan", "Correct Answer": "A"},
+    {"Serial Number": 174, "Country": "Turkey", "Short Name": "TR", "Capital": "Ankara", "Option A": "Ankara", "Option B": "Istanbul", "Option C": "Izmir", "Option D": "Antalya", "Correct Answer": "A"},
+    {"Serial Number": 175, "Country": "Turkmenistan", "Short Name": "TM", "Capital": "Ashgabat", "Option A": "Ashgabat", "Option B": "Turkmenabat", "Option C": "Mary", "Option D": "Dasoguz", "Correct Answer": "A"},
+    {"Serial Number": 176, "Country": "Tuvalu", "Short Name": "TV", "Capital": "Funafuti", "Option A": "Funafuti", "Option B": "Vaitupu", "Option C": "Nukufetau", "Option D": "Nukulaelae", "Correct Answer": "A"},
+    {"Serial Number": 177, "Country": "Uganda", "Short Name": "UG", "Capital": "Kampala", "Option A": "Kampala", "Option B": "Entebbe", "Option C": "Jinja", "Option D": "Mbarara", "Correct Answer": "A"},
+    {"Serial Number": 178, "Country": "Ukraine", "Short Name": "UA", "Capital": "Kyiv", "Option A": "Kyiv", "Option B": "Kharkiv", "Option C": "Odesa", "Option D": "Lviv", "Correct Answer": "A"},
+    {"Serial Number": 179, "Country": "United Arab Emirates", "Short Name": "AE", "Capital": "Abu Dhabi", "Option A": "Abu Dhabi", "Option B": "Dubai", "Option C": "Sharjah", "Option D": "Ajman", "Correct Answer": "A"},
+    {"Serial Number": 180, "Country": "United Kingdom", "Short Name": "GB", "Capital": "London", "Option A": "London", "Option B": "Edinburgh", "Option C": "Belfast", "Option D": "Cardiff", "Correct Answer": "A"},
+    {"Serial Number": 181, "Country": "United States", "Short Name": "US", "Capital": "Washington, D.C.", "Option A": "Washington, D.C.", "Option B": "New York City", "Option C": "Los Angeles", "Option D": "Chicago", "Correct Answer": "A"},
+    {"Serial Number": 182, "Country": "Uruguay", "Short Name": "UY", "Capital": "Montevideo", "Option A": "Montevideo", "Option B": "Salto", "Option C": "Paysandú", "Option D": "Maldonado", "Correct Answer": "A"},
+    {"Serial Number": 183, "Country": "Uzbekistan", "Short Name": "UZ", "Capital": "Tashkent", "Option A": "Tashkent", "Option B": "Samarkand", "Option C": "Bukhara", "Option D": "Namangan", "Correct Answer": "A"},
+    {"Serial Number": 184, "Country": "Vanuatu", "Short Name": "VU", "Capital": "Port Vila", "Option A": "Port Vila", "Option B": "Luganville", "Option C": "Espiritu Santo", "Option D": "Tanna", "Correct Answer": "A"},
+    {"Serial Number": 185, "Country": "Vatican City", "Short Name": "VA", "Capital": "Vatican City", "Option A": "Vatican City", "Option B": "Rome", "Option C": "Florence", "Option D": "Milan", "Correct Answer": "A"},
+    {"Serial Number": 186, "Country": "Venezuela", "Short Name": "VE", "Capital": "Caracas", "Option A": "Caracas", "Option B": "Maracaibo", "Option C": "Valencia", "Option D": "Barquisimeto", "Correct Answer": "A"},
+    {"Serial Number": 187, "Country": "Vietnam", "Short Name": "VN", "Capital": "Hanoi", "Option A": "Hanoi", "Option B": "Ho Chi Minh City", "Option C": "Da Nang", "Option D": "Hue", "Correct Answer": "A"},
+    {"Serial Number": 188, "Country": "Yemen", "Short Name": "YE", "Capital": "Sana'a", "Option A": "Sana'a", "Option B": "Aden", "Option C": "Taiz", "Option D": "Hodeidah", "Correct Answer": "A"},
+    {"Serial Number": 189, "Country": "Zambia", "Short Name": "ZM", "Capital": "Lusaka", "Option A": "Lusaka", "Option B": "Copperbelt", "Option C": "Kitwe", "Option D": "Livingstone", "Correct Answer": "A"},
+    {"Serial Number": 190, "Country": "Zimbabwe", "Short Name": "ZW", "Capital": "Harare", "Option A": "Harare", "Option B": "Bulawayo", "Option C": "Gweru", "Option D": "Mutare", "Correct Answer": "A"}
+];
+        // ];
+
+        function displayCountryInfo(data) {
+            const contentDiv = document.getElementById('content');
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.classList.add('country-info');
+                
+                const serialNumber = item['Serial Number'];
+                const country = item['Country'];
+                const shortName = item['Short Name'];
+                const capital = item['Capital'];
+                const optionA = item['Option A'];
+                const optionB = item['Option B'];
+                const optionC = item['Option C'];
+                const optionD = item['Option D'];
+                const correctAnswer = item['Correct Answer'];
+                
+                // Construct flag image URL
+                // const flagImageUrl = `https://example.com/flags/${shortName.toLowerCase()}.png`;
+                const flagImageUrl = `./png1000px/${shortName.toLowerCase()}.png`;
+
+                // Add content to the div
+                div.innerHTML = `
+                    <img src="${flagImageUrl}" alt="Flag of ${country}" class="flag"/>
+                    <h2>Serial Number: ${serialNumber}</h2>
+                    <p><strong>Country:</strong> ${country}</p>
+                    <p><strong>Short Name:</strong> ${shortName}</p>
+                    <p><strong>Capital:</strong> ${capital}</p>
+                    <p><strong>Option A:</strong> ${optionA}</p>
+                    <p><strong>Option B:</strong> ${optionB}</p>
+                    <p><strong>Option C:</strong> ${optionC}</p>
+                    <p><strong>Option D:</strong> ${optionD}</p>
+                    <p><strong>Correct Answer:</strong> ${correctAnswer}</p>
+                `;
+                
+                contentDiv.appendChild(div);
+            });
+        }
+
+        // function downloadExcel() {
+        //     // Convert JSON to worksheet
+        //     const ws = XLSX.utils.json_to_sheet(jsonData);
+
+        //     // Create a new workbook and append the worksheet
+        //     const wb = XLSX.utils.book_new();
+        //     XLSX.utils.book_append_sheet(wb, ws, "Country Data");
+
+        //     // Generate Excel file and trigger download
+        //     XLSX.writeFile(wb, 'Country_Data.xlsx');
+        // }
+
+        async function downloadExcel() {
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet('Country Data');
+            
+            // Add header row
+            worksheet.addRow(['Serial Number', 'Country', 'Short Name', 'Capital', 'Option A', 'Option B', 'Option C', 'Option D', 'Correct Answer', 'Flag Image']);
+            
+            // Add rows
+            for (const item of jsonData) {
+                const shortName = item['Short Name'];
+
+                // const flagImageUrl = `https://example.com/flags/${item['Short Name'].toLowerCase()}.png`;
+                const flagImageUrl = `./png1000px/${shortName.toLowerCase()}.png`;
+
+                // Add row data
+                const row = worksheet.addRow([
+                    item['Serial Number'],
+                    item['Country'],
+                    item['Short Name'],
+                    item['Capital'],
+                    item['Option A'],
+                    item['Option B'],
+                    item['Option C'],
+                    item['Option D'],
+                    item['Correct Answer'],
+                    flagImageUrl
+                ]);
+                
+                // Add image to worksheet
+                const imageId = workbook.addImage({
+                    base64: await fetch(flagImageUrl).then(res => res.arrayBuffer()).then(buf => new Uint8Array(buf)),
+                    extension: 'png',
+                });
+                worksheet.addImage(imageId, {
+                    tl: { col: 9, row: row.number - 1 },
+                    ext: { width: 50, height: 30 }
+                });
+            }
+
+            // Generate Excel file and trigger download
+            workbook.xlsx.writeBuffer().then(buffer => {
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Country_Data_with_Flags.xlsx';
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        // Display the country information
+        displayCountryInfo(jsonData);
+    </script>
+</body>
+</html>
